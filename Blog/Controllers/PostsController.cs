@@ -9,24 +9,40 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Blog.Models;
+using Blog.DAL;
+using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
+    [Authorize]
+    [RoutePrefix("api/posts")]
     public class PostsController : ApiController
     {
-        private BlogContext db = new BlogContext();
+        //private BlogContext db = new BlogContext();
+        private UnitOfWork unitOfWork = new UnitOfWork();
 
         // GET: api/Posts
-        public IQueryable<Post> GetPosts()
+        [Route]
+        public IEnumerable<Post> GetPosts()
         {
-            return db.Posts;
+            //var posts = from p in db.Posts
+            //            orderby p.CreationDate descending
+            //            select p;
+
+            //return posts;
+
+            var posts = unitOfWork.PostRepository.Get().OrderByDescending(x => x.CreationDate);
+            return posts;
         }
 
         // GET: api/Posts/5
+        [Route("{id}")]
         [ResponseType(typeof(Post))]
         public IHttpActionResult GetPost(int id)
         {
-            Post post = db.Posts.Find(id);
+            //Post post = db.Posts.Find(id);
+            var post = unitOfWork.PostRepository.GetByID(id);
+
             if (post == null)
             {
                 return NotFound();
@@ -37,7 +53,9 @@ namespace Blog.Controllers
 
         // PUT: api/Posts/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutPost(int id, Post post)
+        [HttpPut]
+        [Route("{id}")]
+        public IHttpActionResult Put(int id, Post post)
         {
             if (!ModelState.IsValid)
             {
@@ -49,70 +67,81 @@ namespace Blog.Controllers
                 return BadRequest();
             }
 
-            db.Entry(post).State = EntityState.Modified;
+            //db.Entry(post).State = EntityState.Modified;
 
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PostExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            //try
+            //{
+            //db.SaveChanges();
 
-            return StatusCode(HttpStatusCode.NoContent);
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!PostExists(id))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+            unitOfWork.PostRepository.Update(post);
+            unitOfWork.Save();
+
+            return Ok();
         }
 
         // POST: api/Posts
+        [Route]
         [ResponseType(typeof(Post))]
-        public IHttpActionResult PostPost(Post post)
+        public IHttpActionResult PostPost([FromBody] PostDTO post)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            Post newPost = new Post
+            {
+                Title = post.Title,
+                Content = post.Content,
+                CreationDate = DateTime.Now,
+                AuthorName = User.Identity.Name
+            };
 
-            db.Posts.Add(post);
-            db.SaveChanges();
+            //db.Posts.Add(newPost);
+            //db.SaveChanges();
+            // Rollback automatisé de EF https://social.msdn.microsoft.com/Forums/en-US/32d979ce-9601-4e88-933b-3552cf1e84bd/rollback-to-savechanges?forum=adodotnetentityframework
+            // https://coderwall.com/p/jnniww/why-you-shouldn-t-use-entity-framework-with-transactions
 
-            return CreatedAtRoute("DefaultApi", new { id = post.Id }, post);
+            unitOfWork.PostRepository.Insert(newPost);
+            unitOfWork.Save();
+
+            return Ok(newPost.Id);
         }
 
         // DELETE: api/Posts/5
-        [ResponseType(typeof(Post))]
+        [HttpDelete]
+        [Route("{id}")]
         public IHttpActionResult DeletePost(int id)
         {
-            Post post = db.Posts.Find(id);
-            if (post == null)
-            {
-                return NotFound();
-            }
+            //if (post == null)
+            //{
+            //    return StatusCode(HttpStatusCode.NotFound);
+            //}
 
-            db.Posts.Remove(post);
-            db.SaveChanges();
+            //db.Posts.Remove(post);
+            //db.SaveChanges();
+            Post post = unitOfWork.PostRepository.GetByID(id);
+            unitOfWork.PostRepository.Delete(id);
+            unitOfWork.Save();
 
-            return Ok(post);
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            unitOfWork.Dispose();
             base.Dispose(disposing);
-        }
-
-        private bool PostExists(int id)
-        {
-            return db.Posts.Count(e => e.Id == id) > 0;
         }
     }
 }

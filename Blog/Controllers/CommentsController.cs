@@ -9,24 +9,35 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using Blog.Models;
+using System.Threading.Tasks;
+using Blog.DAL;
 
 namespace Blog.Controllers
 {
+    [RoutePrefix("api/comments")]
+    [Authorize]
     public class CommentsController : ApiController
     {
-        private BlogContext db = new BlogContext();
+        //private BlogContext db = new BlogContext();
+        private UnitOfWork unitOfWork = new UnitOfWork();
 
         // GET: api/Comments
-        public IQueryable<Comment> GetComments()
+        [Route]
+        public IEnumerable<Comment> GetComments()
         {
-            return db.Comments;
+            //return db.Comments;
+            var comments = unitOfWork.CommentRepository.Get();
+            return comments;
         }
 
         // GET: api/Comments/5
+        [Route("{id}")]
         [ResponseType(typeof(Comment))]
         public IHttpActionResult GetComment(int id)
         {
-            Comment comment = db.Comments.Find(id);
+            //Comment comment = db.Comments.Find(id);
+            var comment = unitOfWork.CommentRepository.GetByID(id);
+
             if (comment == null)
             {
                 return NotFound();
@@ -36,6 +47,7 @@ namespace Blog.Controllers
         }
 
         // PUT: api/Comments/5
+        [Route("{id}")]
         [ResponseType(typeof(void))]
         public IHttpActionResult PutComment(int id, Comment comment)
         {
@@ -49,70 +61,80 @@ namespace Blog.Controllers
                 return BadRequest();
             }
 
-            db.Entry(comment).State = EntityState.Modified;
+            //db.Entry(comment).State = EntityState.Modified;
 
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            //try
+            //{
+            //    db.SaveChanges();
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!CommentExists(id))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
 
-            return StatusCode(HttpStatusCode.NoContent);
+            unitOfWork.CommentRepository.Update(comment);
+            unitOfWork.Save();
+            
+            return Ok();
         }
 
         // POST: api/Comments
         [ResponseType(typeof(Comment))]
-        public IHttpActionResult PostComment(Comment comment)
+        [Route]
+        public IHttpActionResult PostComment(CommentDTO comment)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            Comment newComment = new Comment
+            {
+                Content = comment.Content,
+                CreationDate = DateTime.Now,
+                PostId = comment.PostId
+            };
 
-            db.Comments.Add(comment);
-            db.SaveChanges();
+            //db.Comments.Add(newComment);
+            //db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = comment.Id }, comment);
+            unitOfWork.CommentRepository.Insert(newComment);
+            unitOfWork.Save();
+
+            return Ok(newComment.Id);
         }
 
         // DELETE: api/Comments/5
         [ResponseType(typeof(Comment))]
+        [Route("{id}")]
         public IHttpActionResult DeleteComment(int id)
         {
-            Comment comment = db.Comments.Find(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
+            //Comment comment = db.Comments.Find(id);
+            //if (comment == null)
+            //{
+            //    return StatusCode(HttpStatusCode.NotFound);
+            //}
 
-            db.Comments.Remove(comment);
-            db.SaveChanges();
+            //db.Comments.Remove(comment);
+            //db.SaveChanges();
 
-            return Ok(comment);
+            Comment comment = unitOfWork.CommentRepository.GetByID(id);
+            unitOfWork.CommentRepository.Delete(id);
+            unitOfWork.Save();
+
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            unitOfWork.Dispose();
             base.Dispose(disposing);
-        }
-
-        private bool CommentExists(int id)
-        {
-            return db.Comments.Count(e => e.Id == id) > 0;
         }
     }
 }

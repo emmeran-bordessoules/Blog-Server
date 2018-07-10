@@ -12,5 +12,12 @@ namespace Blog.Models
         public DateTime CreationDate { get; set; }
         public Post Post { get; set; }
         public int PostId { get; set; }
+        public string AuthorName { get; set; }
+    }
+
+    public class CommentDTO
+    {
+        public string Content { get; set; }
+        public int PostId { get; set; }
     }
 }
