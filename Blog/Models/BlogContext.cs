@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNet.Identity.EntityFramework;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Web;
 
 namespace Blog.Models
 {
-    public class BlogContext : DbContext
+    public class BlogContext : IdentityDbContext<Author>
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -22,6 +23,6 @@ namespace Blog.Models
         public System.Data.Entity.DbSet<Blog.Models.Post> Posts { get; set; }
 
         public System.Data.Entity.DbSet<Blog.Models.Comment> Comments { get; set; }
-        public System.Data.Entity.DbSet<Blog.Models.Author> Authors { get; set; }
+        //public System.Data.Entity.DbSet<Blog.Models.Author> Authors { get; set; }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using Blog.DAL;
+using Blog.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
@@ -21,7 +24,31 @@ namespace Blog.Provider
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            context.Validated(new ClaimsIdentity(context.Options.AuthenticationType));
+            var roleStore = new RoleStore<IdentityRole>(new BlogContext());
+            var roleMngr = new RoleManager<IdentityRole>(roleStore);
+            var roles = roleMngr.Roles.ToDictionary(x => x.Id, x => x.Name);
+
+            using (AuthRepository _repo = new AuthRepository())
+            {
+                IdentityUser user = await _repo.FindUser(context.UserName, context.Password);
+                
+                if (user == null)
+                {
+                    context.SetError("invalid_grant", "The user name or password is incorrect.");
+                    return;
+                }
+
+                var identity = new ClaimsIdentity(context.Options.AuthenticationType);
+                identity.AddClaim(new Claim("sub", context.UserName));
+
+                foreach(IdentityUserRole role in user.Roles)
+                {
+                    if(roles.TryGetValue(role.RoleId, out string userRole))
+                        identity.AddClaim(new Claim(ClaimTypes.Role, userRole));
+                }
+
+                context.Validated(identity);
+            }
         }
     }
 }

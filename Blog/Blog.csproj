@@ -200,6 +200,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\AuthConfig.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\EntityFrameworkProfilerBootstrapper.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
@@ -244,28 +245,26 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807021342257_Initial.cs" />
-    <Compile Include="Migrations\201807021342257_Initial.Designer.cs">
-      <DependentUpon>201807021342257_Initial.cs</DependentUpon>
+    <Compile Include="Infrastructure\ApplicationRoleManager.cs" />
+    <Compile Include="Infrastructure\ApplicationUserManager.cs" />
+    <Compile Include="Migrations\201807110911236_Reset.cs" />
+    <Compile Include="Migrations\201807110911236_Reset.Designer.cs">
+      <DependentUpon>201807110911236_Reset.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807060829316_add-author-column.cs" />
-    <Compile Include="Migrations\201807060829316_add-author-column.Designer.cs">
-      <DependentUpon>201807060829316_add-author-column.cs</DependentUpon>
+    <Compile Include="Migrations\201807111026169_Reset1.cs" />
+    <Compile Include="Migrations\201807111026169_Reset1.Designer.cs">
+      <DependentUpon>201807111026169_Reset1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807090744397_updata-author.cs" />
-    <Compile Include="Migrations\201807090744397_updata-author.Designer.cs">
-      <DependentUpon>201807090744397_updata-author.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201807100959424_link-author-post.cs" />
-    <Compile Include="Migrations\201807100959424_link-author-post.Designer.cs">
-      <DependentUpon>201807100959424_link-author-post.cs</DependentUpon>
+    <Compile Include="Migrations\201807111213116_remove-password.cs" />
+    <Compile Include="Migrations\201807111213116_remove-password.Designer.cs">
+      <DependentUpon>201807111213116_remove-password.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\AuthContext.cs" />
     <Compile Include="Models\Author.cs" />
     <Compile Include="Models\BlogContext.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Post.cs" />
+    <Compile Include="Models\RoleBinding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\SimpleAuthorizationServerProvider.cs" />
     <Compile Include="StartUp.cs" />
@@ -342,17 +341,14 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201807021342257_Initial.resx">
-      <DependentUpon>201807021342257_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807110911236_Reset.resx">
+      <DependentUpon>201807110911236_Reset.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807060829316_add-author-column.resx">
-      <DependentUpon>201807060829316_add-author-column.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807111026169_Reset1.resx">
+      <DependentUpon>201807111026169_Reset1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807090744397_updata-author.resx">
-      <DependentUpon>201807090744397_updata-author.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807100959424_link-author-post.resx">
-      <DependentUpon>201807100959424_link-author-post.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807111213116_remove-password.resx">
+      <DependentUpon>201807111213116_remove-password.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

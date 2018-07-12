@@ -7,13 +7,13 @@ namespace Blog.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.3-40302")]
-    public sealed partial class linkauthorpost : IMigrationMetadata
+    public sealed partial class removepassword : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(linkauthorpost));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(removepassword));
         
         string IMigrationMetadata.Id
         {
-            get { return "201807100959424_link-author-post"; }
+            get { return "201807111213116_remove-password"; }
         }
         
         string IMigrationMetadata.Source

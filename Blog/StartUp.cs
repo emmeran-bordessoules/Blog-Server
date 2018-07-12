@@ -37,6 +37,7 @@ namespace Blog
                 AuthenticationMode = AuthenticationMode.Active
             };
 
+            //app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
             app.UseOAuthAuthorizationServer(OAuthAuthorizationServerOptions);
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
         }

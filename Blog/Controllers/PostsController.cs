@@ -11,6 +11,7 @@ using System.Web.Http.Description;
 using Blog.Models;
 using Blog.DAL;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 
 namespace Blog.Controllers
 {
@@ -94,6 +95,7 @@ namespace Blog.Controllers
         // POST: api/Posts
         [Route]
         [ResponseType(typeof(Post))]
+        [Authorize(Roles = "admin")]
         public IHttpActionResult PostPost([FromBody] PostDTO post)
         {
             if (!ModelState.IsValid)

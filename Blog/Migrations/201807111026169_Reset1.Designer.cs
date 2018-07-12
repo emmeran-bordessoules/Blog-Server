@@ -7,13 +7,13 @@ namespace Blog.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.1.3-40302")]
-    public sealed partial class Addauthorcolumn : IMigrationMetadata
+    public sealed partial class Reset1 : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(Addauthorcolumn));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Reset1));
         
         string IMigrationMetadata.Id
         {
-            get { return "201807060829316_add-author-column"; }
+            get { return "201807111026169_Reset1"; }
         }
         
         string IMigrationMetadata.Source

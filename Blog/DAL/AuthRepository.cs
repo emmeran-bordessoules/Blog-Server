@@ -11,24 +11,27 @@ namespace Blog.DAL
 {
     public class AuthRepository : IDisposable
     {
-        private AuthContext _ctx;
+        private BlogContext _ctx;
 
-        private UserManager<IdentityUser> _userManager;
+        private UserManager<Author> _userManager;
 
         public AuthRepository()
         {
-            _ctx = new AuthContext();
-            _userManager = new UserManager<IdentityUser>(new UserStore<IdentityUser>(_ctx));
+            _ctx = new BlogContext();
+            _userManager = new UserManager<Author>(new UserStore<Author>(_ctx));
         }
 
-        public async Task<IdentityResult> RegisterUser(Author userModel)
+        public async Task<IdentityResult> RegisterUser(AuthorDTO userModel)
         {
-            IdentityUser user = new IdentityUser
+            Author user = new Author
             {
-                UserName = userModel.UserName
+                UserName = userModel.UserName,
+                Email = userModel.UserName
             };
 
             var result = await _userManager.CreateAsync(user, userModel.Password);
+
+            _userManager.AddToRole(user.Id, "admin" );
 
             return result;
         }
@@ -45,6 +48,12 @@ namespace Blog.DAL
             _ctx.Dispose();
             _userManager.Dispose();
 
+        }
+
+        public class AuthorDTO
+        {
+            public string UserName { get; set; }
+            public string Password { get; set; }
         }
     }
 }
