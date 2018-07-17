@@ -12,32 +12,22 @@ using Microsoft.AspNet.Identity.Owin;
 namespace Blog.Controllers
 {
     [RoutePrefix("api/account")]
-    public class AuthorsController : ApiController
+    public class UsersController : ApiController
     {
-        //private BlogContext db = new BlogContext();
         private UnitOfWork unitOfWork = new UnitOfWork();
         private AuthRepository _repo = new AuthRepository();
-        //private ApplicationRoleManager _AppRoleManager = null;
-
-        //protected ApplicationRoleManager AppRoleManager
-        //{
-        //    get
-        //    {
-        //        return _AppRoleManager ?? Request.GetOwinContext().GetUserManager<ApplicationRoleManager>();
-        //    }
-        //}
 
         // GET: api/Authors
-        public IEnumerable<Author> GetAuthors()
+        [Route]
+        public IEnumerable<User> GetAuthors()
         {
-            //return db.Author;
-            var authors = unitOfWork.AuthorRepository.Get();
-            return authors;
+            var users = unitOfWork.UserRepository.Get();
+            return users;
         }
 
         [AllowAnonymous]
         [Route("Register")]
-        public async Task<IHttpActionResult> Register(AuthorDTO userModel)
+        public async Task<IHttpActionResult> Register(Blog.DAL.AuthRepository.UserDTO userModel)
         {
             if (!ModelState.IsValid)
             {
@@ -61,30 +51,30 @@ namespace Blog.Controllers
         //[ResponseType(typeof(Author))]
         //public IHttpActionResult GetAuthor(int id)
         //{
-        //    Author author = db.Authors.Find(id);
-        //    if (author == null)
+        //    Author user = db.Authors.Find(id);
+        //    if (user == null)
         //    {
         //        return NotFound();
         //    }
 
-        //    return Ok(author);
+        //    return Ok(user);
         //}
 
         //// PUT: api/Authors/5
         //[ResponseType(typeof(void))]
-        //public IHttpActionResult PutAuthor(int id, Author author)
+        //public IHttpActionResult PutAuthor(int id, Author user)
         //{
         //    if (!ModelState.IsValid)
         //    {
         //        return BadRequest(ModelState);
         //    }
 
-        //    if (id != author.Id)
+        //    if (id != user.Id)
         //    {
         //        return BadRequest();
         //    }
 
-        //    db.Entry(author).State = EntityState.Modified;
+        //    db.Entry(user).State = EntityState.Modified;
 
         //    try
         //    {
@@ -107,33 +97,33 @@ namespace Blog.Controllers
 
         //// POST: api/Authors
         //[ResponseType(typeof(Author))]
-        //public IHttpActionResult PostAuthor(Author author)
+        //public IHttpActionResult PostAuthor(Author user)
         //{
         //    if (!ModelState.IsValid)
         //    {
         //        return BadRequest(ModelState);
         //    }
 
-        //    db.Authors.Add(author);
+        //    db.Authors.Add(user);
         //    db.SaveChanges();
 
-        //    return CreatedAtRoute("DefaultApi", new { id = author.Id }, author);
+        //    return CreatedAtRoute("DefaultApi", new { id = user.Id }, user);
         //}
 
         //// DELETE: api/Authors/5
         //[ResponseType(typeof(Author))]
         //public IHttpActionResult DeleteAuthor(int id)
         //{
-        //    Author author = db.Authors.Find(id);
-        //    if (author == null)
+        //    Author user = db.Authors.Find(id);
+        //    if (user == null)
         //    {
         //        return NotFound();
         //    }
 
-        //    db.Authors.Remove(author);
+        //    db.Authors.Remove(user);
         //    db.SaveChanges();
 
-        //    return Ok(author);
+        //    return Ok(user);
         //}
 
         //protected override void Dispose(bool disposing)

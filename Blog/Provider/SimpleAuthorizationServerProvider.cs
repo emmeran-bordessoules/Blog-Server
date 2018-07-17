@@ -1,17 +1,14 @@
 ﻿using Blog.DAL;
+using Blog.Infrastructure;
 using Blog.Models;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.Owin;
 using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.Owin;
 using Microsoft.Owin.Security.OAuth;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Blog.Provider
 {
@@ -24,13 +21,12 @@ namespace Blog.Provider
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            var roleStore = new RoleStore<IdentityRole>(new BlogContext());
-            var roleMngr = new RoleManager<IdentityRole>(roleStore);
+            var roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
             var roles = roleMngr.Roles.ToDictionary(x => x.Id, x => x.Name);
 
             using (AuthRepository _repo = new AuthRepository())
             {
-                IdentityUser user = await _repo.FindUser(context.UserName, context.Password);
+                User user = await _repo.FindUser(context.UserName, context.Password);
                 
                 if (user == null)
                 {
@@ -39,9 +35,9 @@ namespace Blog.Provider
                 }
 
                 var identity = new ClaimsIdentity(context.Options.AuthenticationType);
-                identity.AddClaim(new Claim("sub", context.UserName));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
 
-                foreach(IdentityUserRole role in user.Roles)
+                foreach(UserRoleGuidPk role in user.Roles)
                 {
                     if(roles.TryGetValue(role.RoleId, out string userRole))
                         identity.AddClaim(new Claim(ClaimTypes.Role, userRole));
@@ -49,6 +45,23 @@ namespace Blog.Provider
 
                 context.Validated(identity);
             }
+        }
+
+        public override Task TokenEndpoint(OAuthTokenEndpointContext context)
+        {
+            var roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
+            var roles = roleMngr.Roles.ToDictionary(x => x.Id, x => x.Name);
+
+            UnitOfWork unitOfWork = new UnitOfWork();
+            User user = unitOfWork.UserRepository.GetByID(new Guid(context.Identity.GetUserId()));
+
+            foreach (UserRoleGuidPk role in user.Roles)
+            {
+                if (roles.TryGetValue(role.RoleId, out string userRole))
+                    context.AdditionalResponseParameters.Add("role", userRole);
+            }
+
+            return Task.FromResult<object>(null);            
         }
     }
 }

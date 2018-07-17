@@ -11,11 +11,11 @@ using System.Web.Http.Description;
 using Blog.Models;
 using System.Threading.Tasks;
 using Blog.DAL;
+using System.Security.Claims;
 
 namespace Blog.Controllers
 {
     [RoutePrefix("api/comments")]
-    [Authorize]
     public class CommentsController : ApiController
     {
         //private BlogContext db = new BlogContext();
@@ -25,8 +25,7 @@ namespace Blog.Controllers
         [Route]
         public IEnumerable<Comment> GetComments()
         {
-            //return db.Comments;
-            var comments = unitOfWork.CommentRepository.Get();
+            var comments = unitOfWork.CommentRepository.Get(includeProperties: "Author").OrderByDescending(x => x.CreationDate);
             return comments;
         }
 
@@ -35,7 +34,6 @@ namespace Blog.Controllers
         [ResponseType(typeof(Comment))]
         public IHttpActionResult GetComment(int id)
         {
-            //Comment comment = db.Comments.Find(id);
             var comment = unitOfWork.CommentRepository.GetByID(id);
 
             if (comment == null)
@@ -49,6 +47,7 @@ namespace Blog.Controllers
         // PUT: api/Comments/5
         [Route("{id}")]
         [ResponseType(typeof(void))]
+        [Authorize(Roles = "admin, user")]
         public IHttpActionResult PutComment(int id, Comment comment)
         {
             if (!ModelState.IsValid)
@@ -61,24 +60,6 @@ namespace Blog.Controllers
                 return BadRequest();
             }
 
-            //db.Entry(comment).State = EntityState.Modified;
-
-            //try
-            //{
-            //    db.SaveChanges();
-            //}
-            //catch (DbUpdateConcurrencyException)
-            //{
-            //    if (!CommentExists(id))
-            //    {
-            //        return NotFound();
-            //    }
-            //    else
-            //    {
-            //        throw;
-            //    }
-            //}
-
             unitOfWork.CommentRepository.Update(comment);
             unitOfWork.Save();
             
@@ -86,23 +67,24 @@ namespace Blog.Controllers
         }
 
         // POST: api/Comments
-        [ResponseType(typeof(Comment))]
         [Route]
+        [Authorize(Roles = "admin, user")]
         public IHttpActionResult PostComment(CommentDTO comment)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            ClaimsIdentity identity = (ClaimsIdentity)User.Identity;
+            identity.Claims.ToDictionary(x => x.Type, x => x.Value).TryGetValue(ClaimTypes.NameIdentifier, out string userId);
             Comment newComment = new Comment
             {
                 Content = comment.Content,
                 CreationDate = DateTime.Now,
-                PostId = comment.PostId
+                PostId = comment.PostId,
+                AuthorId = new Guid(userId)
             };
-
-            //db.Comments.Add(newComment);
-            //db.SaveChanges();
 
             unitOfWork.CommentRepository.Insert(newComment);
             unitOfWork.Save();
@@ -113,17 +95,9 @@ namespace Blog.Controllers
         // DELETE: api/Comments/5
         [ResponseType(typeof(Comment))]
         [Route("{id}")]
+        [Authorize(Roles = "admin, user")]
         public IHttpActionResult DeleteComment(int id)
         {
-            //Comment comment = db.Comments.Find(id);
-            //if (comment == null)
-            //{
-            //    return StatusCode(HttpStatusCode.NotFound);
-            //}
-
-            //db.Comments.Remove(comment);
-            //db.SaveChanges();
-
             Comment comment = unitOfWork.CommentRepository.GetByID(id);
             unitOfWork.CommentRepository.Delete(id);
             unitOfWork.Save();
@@ -136,5 +110,15 @@ namespace Blog.Controllers
             unitOfWork.Dispose();
             base.Dispose(disposing);
         }
+    }
+
+    public class CommentDTO
+    {
+        public int Id { get; set; }
+        public string Content { get; set; }
+        public DateTime CreationDate { get; set; }
+        public AuthorDTO Author { get; set; }
+        public int PostId { get; set; }
+        public Boolean IsAuthor { get; set; }
     }
 }

@@ -234,7 +234,7 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
-    <Compile Include="Controllers\AuthorsController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Controllers\CommentsController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PostCommentsController.cs" />
@@ -247,20 +247,20 @@
     </Compile>
     <Compile Include="Infrastructure\ApplicationRoleManager.cs" />
     <Compile Include="Infrastructure\ApplicationUserManager.cs" />
-    <Compile Include="Migrations\201807110911236_Reset.cs" />
-    <Compile Include="Migrations\201807110911236_Reset.Designer.cs">
-      <DependentUpon>201807110911236_Reset.cs</DependentUpon>
+    <Compile Include="Migrations\201807131004093_Initial.cs" />
+    <Compile Include="Migrations\201807131004093_Initial.Designer.cs">
+      <DependentUpon>201807131004093_Initial.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807111026169_Reset1.cs" />
-    <Compile Include="Migrations\201807111026169_Reset1.Designer.cs">
-      <DependentUpon>201807111026169_Reset1.cs</DependentUpon>
+    <Compile Include="Migrations\201807131327572_Add-id-guid.cs" />
+    <Compile Include="Migrations\201807131327572_Add-id-guid.Designer.cs">
+      <DependentUpon>201807131327572_Add-id-guid.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201807111213116_remove-password.cs" />
-    <Compile Include="Migrations\201807111213116_remove-password.Designer.cs">
-      <DependentUpon>201807111213116_remove-password.cs</DependentUpon>
+    <Compile Include="Migrations\201807131337183_Add-id-guid-2.cs" />
+    <Compile Include="Migrations\201807131337183_Add-id-guid-2.Designer.cs">
+      <DependentUpon>201807131337183_Add-id-guid-2.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\Author.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Models\BlogContext.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Post.cs" />
@@ -341,14 +341,14 @@
     <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201807110911236_Reset.resx">
-      <DependentUpon>201807110911236_Reset.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807131004093_Initial.resx">
+      <DependentUpon>201807131004093_Initial.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807111026169_Reset1.resx">
-      <DependentUpon>201807111026169_Reset1.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807131327572_Add-id-guid.resx">
+      <DependentUpon>201807131327572_Add-id-guid.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201807111213116_remove-password.resx">
-      <DependentUpon>201807111213116_remove-password.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201807131337183_Add-id-guid-2.resx">
+      <DependentUpon>201807131337183_Add-id-guid-2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

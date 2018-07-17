@@ -1,25 +1,26 @@
 ﻿using System;
 using Blog.Models;
+using System.Data.Entity.Validation;
 
 namespace Blog.DAL
 {
     public class UnitOfWork : IDisposable
     {
         private BlogContext context = new BlogContext();
-        private GenericRepository<Author> authorRepository;
+        private GenericRepository<User> userRepository;
         private GenericRepository<Comment> commentRepository;
         private GenericRepository<Post> postRepository;
 
-        public GenericRepository<Author> AuthorRepository
+        public GenericRepository<User> UserRepository
         {
             get
             {
 
-                if (this.authorRepository == null)
+                if (this.userRepository == null)
                 {
-                    this.authorRepository = new GenericRepository<Author>(context);
+                    this.userRepository = new GenericRepository<User>(context);
                 }
-                return authorRepository;
+                return userRepository;
             }
         }
 

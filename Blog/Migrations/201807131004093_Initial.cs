@@ -3,7 +3,7 @@ namespace Blog.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class Reset : DbMigration
+    public partial class Initial : DbMigration
     {
         public override void Up()
         {
@@ -15,55 +15,19 @@ namespace Blog.Migrations
                         Content = c.String(),
                         CreationDate = c.DateTime(nullable: false),
                         PostId = c.Int(nullable: false),
-                        AuthorName = c.String(),
+                        AuthorId = c.Guid(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.AspNetUsers", t => t.AuthorId, cascadeDelete: true)
                 .ForeignKey("dbo.Posts", t => t.PostId, cascadeDelete: true)
-                .Index(t => t.PostId);
-            
-            CreateTable(
-                "dbo.Posts",
-                c => new
-                    {
-                        Id = c.Int(nullable: false, identity: true),
-                        Title = c.String(),
-                        Content = c.String(),
-                        CreationDate = c.DateTime(nullable: false),
-                        AuthorName = c.String(),
-                    })
-                .PrimaryKey(t => t.Id);
-            
-            CreateTable(
-                "dbo.AspNetRoles",
-                c => new
-                    {
-                        Id = c.String(nullable: false, maxLength: 128),
-                        Name = c.String(nullable: false, maxLength: 256),
-                    })
-                .PrimaryKey(t => t.Id)
-                .Index(t => t.Name, unique: true, name: "RoleNameIndex");
-            
-            CreateTable(
-                "dbo.AspNetUserRoles",
-                c => new
-                    {
-                        UserId = c.String(nullable: false, maxLength: 128),
-                        RoleId = c.String(nullable: false, maxLength: 128),
-                    })
-                .PrimaryKey(t => new { t.UserId, t.RoleId })
-                .ForeignKey("dbo.AspNetRoles", t => t.RoleId, cascadeDelete: true)
-                .ForeignKey("dbo.AspNetUsers", t => t.UserId, cascadeDelete: true)
-                .Index(t => t.UserId)
-                .Index(t => t.RoleId);
+                .Index(t => t.PostId)
+                .Index(t => t.AuthorId);
             
             CreateTable(
                 "dbo.AspNetUsers",
                 c => new
                     {
-                        Id = c.String(nullable: false, maxLength: 128),
-                        Password = c.String(nullable: false, maxLength: 100),
-                        ConfirmPassword = c.String(),
-                        Role = c.String(),
+                        Id = c.Guid(nullable: false),
                         Email = c.String(maxLength: 256),
                         EmailConfirmed = c.Boolean(nullable: false),
                         PasswordHash = c.String(),
@@ -84,7 +48,7 @@ namespace Blog.Migrations
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
-                        UserId = c.String(nullable: false, maxLength: 128),
+                        UserId = c.Guid(nullable: false),
                         ClaimType = c.String(),
                         ClaimValue = c.String(),
                     })
@@ -98,34 +62,75 @@ namespace Blog.Migrations
                     {
                         LoginProvider = c.String(nullable: false, maxLength: 128),
                         ProviderKey = c.String(nullable: false, maxLength: 128),
-                        UserId = c.String(nullable: false, maxLength: 128),
+                        UserId = c.Guid(nullable: false),
                     })
                 .PrimaryKey(t => new { t.LoginProvider, t.ProviderKey, t.UserId })
                 .ForeignKey("dbo.AspNetUsers", t => t.UserId, cascadeDelete: true)
                 .Index(t => t.UserId);
             
+            CreateTable(
+                "dbo.AspNetUserRoles",
+                c => new
+                    {
+                        UserId = c.Guid(nullable: false),
+                        RoleId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => new { t.UserId, t.RoleId })
+                .ForeignKey("dbo.AspNetUsers", t => t.UserId, cascadeDelete: true)
+                .ForeignKey("dbo.AspNetRoles", t => t.RoleId, cascadeDelete: true)
+                .Index(t => t.UserId)
+                .Index(t => t.RoleId);
+            
+            CreateTable(
+                "dbo.Posts",
+                c => new
+                    {
+                        Id = c.Int(nullable: false, identity: true),
+                        Title = c.String(),
+                        Content = c.String(),
+                        CreationDate = c.DateTime(nullable: false),
+                        AuthorId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.AspNetUsers", t => t.AuthorId, cascadeDelete: false)
+                .Index(t => t.AuthorId);
+            
+            CreateTable(
+                "dbo.AspNetRoles",
+                c => new
+                    {
+                        Id = c.Guid(nullable: false),
+                        Name = c.String(nullable: false, maxLength: 256),
+                    })
+                .PrimaryKey(t => t.Id)
+                .Index(t => t.Name, unique: true, name: "RoleNameIndex");
+            
         }
         
         public override void Down()
         {
+            DropForeignKey("dbo.AspNetUserRoles", "RoleId", "dbo.AspNetRoles");
+            DropForeignKey("dbo.Comments", "PostId", "dbo.Posts");
+            DropForeignKey("dbo.Posts", "AuthorId", "dbo.AspNetUsers");
+            DropForeignKey("dbo.Comments", "AuthorId", "dbo.AspNetUsers");
             DropForeignKey("dbo.AspNetUserRoles", "UserId", "dbo.AspNetUsers");
             DropForeignKey("dbo.AspNetUserLogins", "UserId", "dbo.AspNetUsers");
             DropForeignKey("dbo.AspNetUserClaims", "UserId", "dbo.AspNetUsers");
-            DropForeignKey("dbo.AspNetUserRoles", "RoleId", "dbo.AspNetRoles");
-            DropForeignKey("dbo.Comments", "PostId", "dbo.Posts");
+            DropIndex("dbo.AspNetRoles", "RoleNameIndex");
+            DropIndex("dbo.Posts", new[] { "AuthorId" });
+            DropIndex("dbo.AspNetUserRoles", new[] { "RoleId" });
+            DropIndex("dbo.AspNetUserRoles", new[] { "UserId" });
             DropIndex("dbo.AspNetUserLogins", new[] { "UserId" });
             DropIndex("dbo.AspNetUserClaims", new[] { "UserId" });
             DropIndex("dbo.AspNetUsers", "UserNameIndex");
-            DropIndex("dbo.AspNetUserRoles", new[] { "RoleId" });
-            DropIndex("dbo.AspNetUserRoles", new[] { "UserId" });
-            DropIndex("dbo.AspNetRoles", "RoleNameIndex");
+            DropIndex("dbo.Comments", new[] { "AuthorId" });
             DropIndex("dbo.Comments", new[] { "PostId" });
+            DropTable("dbo.AspNetRoles");
+            DropTable("dbo.Posts");
+            DropTable("dbo.AspNetUserRoles");
             DropTable("dbo.AspNetUserLogins");
             DropTable("dbo.AspNetUserClaims");
             DropTable("dbo.AspNetUsers");
-            DropTable("dbo.AspNetUserRoles");
-            DropTable("dbo.AspNetRoles");
-            DropTable("dbo.Posts");
             DropTable("dbo.Comments");
         }
     }

@@ -9,10 +9,6 @@ namespace Blog
     {
         public static void Register(HttpConfiguration config)
         {
-            //config.SuppressDefaultHostAuthentication();
-            //config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
-            // Configuration et services API Web
-            //config.EnableCors(new EnableCorsAttribute("*", "*", "*"));
             // Itinéraires de l'API Web
             config.MapHttpAttributeRoutes();
 

@@ -8,6 +8,10 @@ using System.Web.Http;
 using Blog.Provider;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Cors;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Blog.Infrastructure;
+using Blog.Models;
 
 [assembly: OwinStartup(typeof(Blog.StartUp))]
 namespace Blog
@@ -16,7 +20,6 @@ namespace Blog
     {
         public void Configuration(IAppBuilder app)
         {
-            //app.UseCors(CorsOptions.AllowAll);
             ConfigureOAuth(app);
 
             HttpConfiguration config = new HttpConfiguration();
@@ -37,7 +40,6 @@ namespace Blog
                 AuthenticationMode = AuthenticationMode.Active
             };
 
-            //app.CreatePerOwinContext<ApplicationRoleManager>(ApplicationRoleManager.Create);
             app.UseOAuthAuthorizationServer(OAuthAuthorizationServerOptions);
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
         }

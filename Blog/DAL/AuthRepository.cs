@@ -6,6 +6,7 @@ using Blog.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Threading.Tasks;
+using System.Data.Entity.Validation;
 
 namespace Blog.DAL
 {
@@ -13,32 +14,31 @@ namespace Blog.DAL
     {
         private BlogContext _ctx;
 
-        private UserManager<Author> _userManager;
+        private UserManager<User, Guid> _userManager;
 
         public AuthRepository()
         {
             _ctx = new BlogContext();
-            _userManager = new UserManager<Author>(new UserStore<Author>(_ctx));
+            _userManager = new UserManager<User, Guid>(new UserStoreGuidPk(_ctx));
         }
 
-        public async Task<IdentityResult> RegisterUser(AuthorDTO userModel)
+        public async Task<IdentityResult> RegisterUser(UserDTO userModel)
         {
-            Author user = new Author
+            User user = new User
             {
                 UserName = userModel.UserName,
                 Email = userModel.UserName
             };
 
             var result = await _userManager.CreateAsync(user, userModel.Password);
-
-            _userManager.AddToRole(user.Id, "admin" );
+            _userManager.AddToRole(user.Id, userModel.Role);
 
             return result;
         }
 
-        public async Task<IdentityUser> FindUser(string userName, string password)
+        public async Task<User> FindUser(string userName, string password)
         {
-            IdentityUser user = await _userManager.FindAsync(userName, password);
+            User user = await _userManager.FindAsync(userName, password);
 
             return user;
         }
@@ -50,10 +50,11 @@ namespace Blog.DAL
 
         }
 
-        public class AuthorDTO
+        public class UserDTO
         {
             public string UserName { get; set; }
             public string Password { get; set; }
+            public string Role { get; set; }
         }
     }
 }
