@@ -28,7 +28,7 @@ namespace Blog.Controllers
                 Content = x.Content,
                 CreationDate = x.CreationDate,
                 PostId = x.PostId,
-                IsAuthor = new Guid(userId) == x.Author.Id,
+                IsAuthor = userId != null ? new Guid(userId) == x.Author.Id : false,
                 Author = new AuthorDTO
                 {
                     UserName = x.Author.UserName,

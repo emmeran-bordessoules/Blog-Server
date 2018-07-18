@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using Blog.Infrastructure;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -49,7 +50,7 @@ namespace Blog.Models
             base.Id = Guid.NewGuid();
         }
 
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<User, Guid> user, string authenticationType)
+        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager user, string authenticationType)
         {
             var userIdentity = await user.CreateIdentityAsync(this, authenticationType);
             // Add custom user claims here

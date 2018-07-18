@@ -26,7 +26,7 @@ namespace Blog.Controllers
         public IEnumerable<PostDTO> GetPosts()
         {
             var posts = unitOfWork.PostRepository.Get(includeProperties: "Author").OrderByDescending(x => x.CreationDate);
-            ClaimsIdentity identity = (ClaimsIdentity)User.Identity;
+            var identity = (ClaimsIdentity)User.Identity;
             identity.Claims.ToDictionary(x => x.Type, x => x.Value).TryGetValue(ClaimTypes.NameIdentifier, out string userId);
             List<PostDTO> newPosts = posts.Select(x => new PostDTO
             {
@@ -34,7 +34,7 @@ namespace Blog.Controllers
                 Title = x.Title,
                 Content = x.Content,
                 CreationDate = x.CreationDate,
-                IsAuthor = new Guid(userId) == x.Author.Id,
+                IsAuthor = userId != null ? new Guid(userId) == x.Author.Id : false,
                 Author = new AuthorDTO
                 {
                     UserName = x.Author.UserName,
@@ -59,7 +59,7 @@ namespace Blog.Controllers
                 Title = post.Title,
                 Content = post.Content,
                 CreationDate = post.CreationDate,
-                IsAuthor = new Guid(userId) == post.Author.Id,
+                IsAuthor = userId != null ? new Guid(userId) == post.Author.Id : false,
                 Author = new AuthorDTO
                 {
                     UserName = post.Author.UserName,
@@ -74,12 +74,21 @@ namespace Blog.Controllers
         [ResponseType(typeof(void))]
         [Route("{id}")]
         [Authorize(Roles = "admin")]
-        public IHttpActionResult Put(int id, Post post)
+        public IHttpActionResult Put(int id, PostDTO postDTO)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+
+            Post post = new Post
+            {
+                Id = postDTO.Id,
+                Title = postDTO.Title,
+                Content = postDTO.Content,
+                CreationDate = postDTO.CreationDate,
+                AuthorId = postDTO.Author.Id
+            };
 
             if (id != post.Id)
             {

@@ -3,6 +3,8 @@ using Blog.Infrastructure;
 using Blog.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.OAuth;
 using System;
 using System.Collections.Generic;
@@ -14,20 +16,23 @@ namespace Blog.Provider
 {
     public class SimpleAuthorizationServerProvider : OAuthAuthorizationServerProvider
     {
-        public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
+        private UnitOfWork unitOfWork = new UnitOfWork();
+
+        public override Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
             context.Validated();
+            return Task.FromResult<object>(null);
         }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            var roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
+            ApplicationRoleManager roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
             var roles = roleMngr.Roles.ToDictionary(x => x.Id, x => x.Name);
 
             using (AuthRepository _repo = new AuthRepository())
             {
                 User user = await _repo.FindUser(context.UserName, context.Password);
-                
+            
                 if (user == null)
                 {
                     context.SetError("invalid_grant", "The user name or password is incorrect.");
@@ -37,9 +42,9 @@ namespace Blog.Provider
                 var identity = new ClaimsIdentity(context.Options.AuthenticationType);
                 identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
 
-                foreach(UserRoleGuidPk role in user.Roles)
+                foreach (UserRoleGuidPk role in user.Roles)
                 {
-                    if(roles.TryGetValue(role.RoleId, out string userRole))
+                    if (roles.TryGetValue(role.RoleId, out string userRole))
                         identity.AddClaim(new Claim(ClaimTypes.Role, userRole));
                 }
 
@@ -49,10 +54,8 @@ namespace Blog.Provider
 
         public override Task TokenEndpoint(OAuthTokenEndpointContext context)
         {
-            var roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
+            ApplicationRoleManager roleMngr = new ApplicationRoleManager(new RoleStoreGuidPk(new BlogContext()));
             var roles = roleMngr.Roles.ToDictionary(x => x.Id, x => x.Name);
-
-            UnitOfWork unitOfWork = new UnitOfWork();
             User user = unitOfWork.UserRepository.GetByID(new Guid(context.Identity.GetUserId()));
 
             foreach (UserRoleGuidPk role in user.Roles)
@@ -61,7 +64,7 @@ namespace Blog.Provider
                     context.AdditionalResponseParameters.Add("role", userRole);
             }
 
-            return Task.FromResult<object>(null);            
+            return Task.FromResult<object>(null);
         }
     }
 }
